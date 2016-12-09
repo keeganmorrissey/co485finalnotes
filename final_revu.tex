@@ -1,0 +1,201 @@
+\documentclass[12pt]{article}
+ \usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb,amsfonts,listings,multirow}
+\usepackage[final]{pdfpages}
+
+\setlength{\parindent}{0cm}
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\prblm}[1]{\section{#1}}        % Problem.
+\newcommand{\subprblm}[1]{\subsection{#1}}      % Sub Problem
+\newcommand{\I}{\Rightarrow}
+\newcommand{\rank}{\text{rank}}
+\newcommand{\ch}{\text{ch}}
+\newcommand{\im}{\text{im }}
+\newcommand{\e}{\epsilon}
+\newcommand{\et}{e^{\frac{2i\pi}{n}}}
+\newcommand{\Qp}{\Q(\sqrt[]{p} + \sqrt[]{q})}
+\newcommand{\Qc}{\Q(\sqrt[]{p}, \sqrt[]{q})}
+\newcommand{\p}{\sqrt[]{p}}
+\newcommand{\q}{\sqrt[]{q}}
+\newcommand{\gal}[2]{\text{Gal}_{#1}(#2)}
+\newcommand{\lcm}{\text{lcm}}
+\newcommand{\modd}[1]{\text{ (mod } #1\text{)}}
+\newcommand{\jac}[2]{\left( \frac{#1}{#2} \right)}
+\newcommand{\ord}[1]{\text{ord(} #1\text{)}}
+ 
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+%If you want to title your bold things something different just make another thing exactly like this but replace "problem" with the name of the thing you want, like theorem or lemma or whatever
+ 
+\begin{document}
+ 
+%\renewcommand{\qedsymbol}{\filledbox}
+%Good resources for looking up how to do stuff:
+%Binary operators: http://www.access2science.com/latex/Binary.html
+%General help: http://en.wikibooks.org/wiki/LaTeX/Mathematics
+%Or just google stuff
+ 
+\title{CO 485 Final Review}
+\author{Keegan Morrissey}
+\date{December 12, 2016}
+\maketitle
+
+\section{RSA Public Key Encryption}
+\subsection{Scheme}
+
+\begin{itemize}
+\item pub key: $(n,e)$, priv key: $d$
+\item $n = pq, ed \equiv 1 \modd \phi, \phi = (p-1)(q-1)$
+\item Encr: $c = m^e \mod n$
+\item Decr: $m = c^d \mod n$
+\end{itemize}
+
+\subsection{Proof of Correctness}
+
+\begin{itemize}
+\item $m \in [0,n-1], c = m^e \mod n, m' = c^d \mod n$, want $m' = m$
+\item Case when $m \equiv 0 \modd p$ is easy so consider $m \not\equiv 0 \modd p$
+\item FlT $\I m^{p-1} \equiv 1 \modd p$
+\item Write $ed = 1 + k(p-1)(q-1), k \in \Z$
+\item $m' \equiv m^{ed} \equiv m\cdot m^{k(p-1)(q-1)} \equiv m\cdot 1^{k(q-1)} \equiv m \modd p$
+\item Similarly, $m' \equiv m \modd q$
+\item CRT $\I m' \equiv m \modd n$
+\item $m',m \in [0,n-1] \I m' = m$
+\end{itemize}
+
+\subsection{Modular Exponentiation}
+
+\begin{itemize}
+\item $a,b,m \in [0, n-1], k = \text{bitlength}(n) = O(\log n)$
+\item Modular $+,-$: $O(k)$, Modular $\cdot$, inverse: $O(k^2)$
+\item Modular Exponentiation: $O(k^3)$ using repeated-square-and-multiply method, to compute $a^m \mod n$:
+\subitem $m = \sum_{i = 0}^{k-1} m_i2^i$
+\subitem $a^m \equiv a^{\sum_{i=0}^{k-1} m_i2^i} \equiv \prod_{i=0}^{k-1} a^{m_i2^i} \equiv \prod_{i = 0, m_i=1}^{k-1} a^{2^i}$
+\end{itemize}
+
+\section{Elementary Number Theory}
+\subsection{Quadratic Residues}
+\subsubsection{Definitions}
+
+\begin{itemize}
+\item $\Z_n = \{0,...,n-1\}, \Z_n^* = \{a \in \Z_n : \gcd(a,n)=1 \}$
+\item $\phi(1) = 1$; for $n \ge 2$, $\phi(n) = |\Z_n^*|$
+\item $n$ prime $\I \phi(n) = n-1$, $\gcd(m,n) = 1 \I \phi(mn) = \phi(m)\phi(n)$
+\item Langrange's Thm: $a \in \Z_n^* \I a^{\phi(n)} \equiv 1 \modd n$
+\item $\ord{a}$ is the smallest $t$ such that $a^t \equiv 1 \modd n$
+\item $a^s \equiv 1 \modd n \iff \ord{a}|s$, $a^x \equiv a^y \modd n \iff x \equiv y \modd{\ord{a}}$
+\item A generator has order $p-1$. There are exactly $\phi(p-1)$ generators of $\Z_p^*$.
+\item $\alpha$ is a generator of $\Z_p^* \I \Z_p^* = \{a^i \modd p: 0 \le i \le p-2\}$
+\item $QR_n = \{a \in \Z_n^*: a \text{ has a square root in } \Z_n^* \}$, $\overline{QR_n} = \{a \in \Z_n^*: a \text{ has no square root in } \Z_n^* \}$
+\item Thm: $p \ge 3$ is prime, $a = \alpha^k \mod p$, $a \in QR_p \iff k$ is even.
+\item Cor: $p \ge 3$ is prime, then $|QR_p| = |\overline{QR_p}| = \frac{p-1}{2}$
+\end{itemize}
+
+\subsubsection{Legendre and Jacobi Symbols}
+
+\begin{itemize}
+\item $p$: odd prime, $\jac{a}{p} = 0: p|a, 1: a\mod p \in QR_p, -1: a\mod p \in \overline{QR_p}$
+\item Euler's Thm: $\jac{a}{p} = a^{(p-1)/2} \mod p$
+\item $n = p_1^{e_1}\cdot ... \cdot p_k^{e_k} \in \Z$, $\jac{a}{n} = \jac{a}{p_1}^{e_1}\cdot ... \cdot \jac{a}{p_k}^{e_k}$
+\item $\jac{a}{n} = 0 \iff \gcd(a,n) \ne 1$
+\item Properties:
+\subitem $\jac{ab}{n} \jac{a}{n}\jac{b}{n}$
+\subitem $a \equiv b \modd n \I \jac{a}{n} = \jac{b}{n}$
+\subitem $\jac{a}{mn} = \jac{a}{m}\jac{a}{n}$
+\subitem $\jac{1}{n} = 1$
+\subitem $\jac{-1}{n} = (-1)^{(n-1)/2}$
+\subitem $\jac{2}{n} = (-1)^{(n^2-1)/8}$
+\subitem $\jac{m}{n} = \jac{n}{m} \cdot (-1)^{\frac{m-1}{2}\cdot\frac{n-1}{2}}$
+\item \textbf{Caution:} $n$ not prime, then $\jac{a}{n}$ does not imply that $a \in QR_n$, but $a \in QR_n \I \jac{a}{n} = 1$
+\item Application: Coin flipping over the phone
+\end{itemize}
+
+\subsection{PRIMES}
+
+\begin{itemize}
+\item Prime number Thm: $\pi(x)$: \# of primes in $[2,x]$; $\lim_{x\to\infty} \frac{\pi(x)}{x/\ln x} = 1$
+\item For $x \ge 17$, $\frac{1.26x}{\ln x} > \pi(x) > \frac{x}{\ln x}$
+\item Thus, we don't have to test many numbers for primality before we find a prime
+\end{itemize}
+
+\subsubsection{Complexity Class}
+
+\begin{itemize}
+\item PRIMES $\in$ NP $\cap$ CO-NP
+\subitem CO-NP Cert: a proper divisor of $n$
+\subitem NP Cert: $\alpha \in \Z_n^*$ with order $n-1$ and $n-1 = \prod_{i=1}^{t} p_i^{e_i}$, recursive certificates that each $p_i$ is prime.
+\end{itemize}
+
+\subsubsection{Trial Division}
+\subsubsection{Fermat's Test}
+
+\begin{itemize}
+\item Fermat's Test: $n$ prime and $a \in [1,n-1]$, then $a^{n-1} \equiv 1 \modd n$
+\subitem Test with $k$ values for $a$, if it $a^{n-1} \not\equiv 1 \modd n$, (or $a \notin \Z_n^*$) then $n$ is composite, else likely prime
+\subitem if there is a Fermat Witness in $\Z_n^*$, then at least half of the elements in $\Z_n^*$ are Fermat Witnesses
+\subsubitem Proof: the set of all Fermat liars for $n$ is a proper subgroup of $\Z_n^*$.
+\subitem \textbf{Problem:} Carmichael Numbers: $n \ge 3$ with $a^{n-1} \equiv 1 \modd n$  for all $a \in \Z_n^*$
+\item Thm: Odd, composite $n$ is Carmichael iff $n$ is square-free, prime $p$ divides $n \I$ \\$p-1|n-1$
+\end{itemize}
+
+\subsubsection{Solovay-Strassen Test}
+
+\begin{itemize}
+\item $n$ odd, prime then $a^{(n-1)/2} \equiv \jac{a}{n} \modd n$ for all $a \in [0,n-1]$
+\subitem Repeat this with $k$ values of $a$, if many pass, likely prime.
+\item If there exists one Euler Witness for $n$ in $\Z_n^*$, then at least half of the elements of $\Z_n^*$ are Euler witnesses for $n$.
+\subitem Proof: the set of Euler liars for $n$ is a proper subgroup of $\Z_n^*$.
+\item Thm: if $n$ is composite, then there exists an Euler witness for $n$ in $\Z_n^*$.
+\item Proof: if $n$ is square-free, $a$ such that $a \equiv b \modd n$ and $a \equiv 1 \modd n$ is an Euler witness for $n$ in $\Z_n^*$.
+\item if $n$ is not square-free, $a = 1+(n/p)$ is an Euler witness for $n$ in $\Z_n^*$.
+\item In each case, compute $\jac{a}{n}$, and since $\jac{a}{n} \ne 0$, then $a \in \Z_n^*$. Then compute $a^{\frac{n-1}{2}} \mod n$ and show that this is not equal to $\jac{a}{n}$.
+\end{itemize}
+
+We thus conclude that both deciding whether a number is prime and generating primes are both easy tasks.
+
+\subsection{Factoring Integers}
+
+\begin{itemize}
+\item COMPUTE-$d$: given $(n,e)$, compute $d$.
+\item FACTOR-$n$: given $(n,e)$, compute $p,q$
+\item Thm: FACTOR-$n$ $\equiv_P$ COMPUTE-$d$
+\item COMPUTE-$d$ $\le_P$ FACTOR-$n$: obvious
+\item FACTOR-$n$ $\le_P$ COMPUTE-$d$: (case: $e < \sqrt{n}$)
+\subitem Claim: $\tilde{k} = (ed-1)/n$, $k = (ed-1)/phi$, then $0 < k - \tilde{k} < 6$
+\subitem use oracle to compute $d$
+\subitem compute $\tilde{k}$, then find $k$, then find $\phi$, then find $p+q$
+\subitem Solve with quad eqn: $(x-p)(x-q) = x^2 - (p+q)x + pq = 0$ for $p$ or $q$.
+\end{itemize}
+
+\section{RSA Signature Scheme}
+\subsection{Scheme}
+\subsection{Chosen Message Attack}
+\subsection{Security Argument}
+
+\section{Discrete Log Problem}
+\subsection{Definition}
+\subsection{Known Algorithms}
+\subsection{Diffie-Hellman}
+\subsection{Schnor Signature Schemes}
+
+\section{Elliptic Curves}
+\subsection{Definition}
+\subsection{Basic ECDH}
+\subsection{EC Dual Random Bit Generators}
+\subsection{Pairings}
+\subsection{Weil Pairing}
+
+
+
+
+
+
+
+
+\end{document}
